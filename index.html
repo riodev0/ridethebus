@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride the Bus | RioDev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a5c36;
+            --secondary: #f8c537;
+            --dark-green: #0a3b22;
+            --light-green: #1a7a4a;
+            --red: #e74c3c;
+            --black: #222;
+            --white: #f9f9f9;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background-color: var(--dark-green);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        
+        h1 {
+            color: var(--secondary);
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .balance-display {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--secondary);
+            color: var(--black);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .game-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .betting-panel {
+            background-color: var(--dark-green);
+            padding: 1.5rem;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .bet-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chip-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chip {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chip:hover {
+            transform: scale(1.1);
+        }
+        
+        .chip-5 { background-color: #3498db; }
+        .chip-10 { background-color: #e74c3c; }
+        .chip-25 { background-color: #f39c12; }
+        .chip-50 { background-color: #2ecc71; }
+        .chip-100 { background-color: #9b59b6; }
+        
+        .bet-display {
+            background-color: var(--light-green);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .game-board {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .phase-container {
+            background-color: var(--dark-green);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .phase-title {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .phase-instructions {
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+        
+        .card-display {
+            min-height: 180px;
+            padding: 1rem;
+            background-color: var(--light-green);
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            width: 100px;
+            height: 140px;
+            background-color: var(--white);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0.5rem;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+            transform-style: preserve-3d;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card.red {
+            color: var(--red);
+        }
+        
+        .card.black {
+            color: var(--black);
+        }
+        
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .card-suit {
+            font-size: 1.5rem;
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+        }
+        
+        .card-back {
+            background: repeating-linear-gradient(
+                45deg,
+                var(--red),
+                var(--red) 10px,
+                var(--black) 10px,
+                var(--black) 20px
+            );
+            color: transparent;
+        }
+        
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: var(--black);
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--red);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .message-panel {
+            background-color: var(--dark-green);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .win-message {
+            color: var(--secondary);
+            text-shadow: 0 0 5px rgba(248, 197, 55, 0.5);
+        }
+        
+        .lose-message {
+            color: var(--red);
+            text-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background-color: var(--dark-green);
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .rules-list {
+            text-align: left;
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .rules-list li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .phase-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .phase-option {
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .phase-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .option-red {
+            background-color: var(--red);
+            color: white;
+        }
+        
+        .option-black {
+            background-color: var(--black);
+            color: white;
+        }
+        
+        .option-higher {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .option-lower {
+            background-color: #9b59b6;
+            color: white;
+        }
+        
+        .option-outside {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .option-inside {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .suit-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .suit-option {
+            padding: 0.8rem;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .suit-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .suit-hearts {
+            background-color: var(--red);
+            color: white;
+        }
+        
+        .suit-diamonds {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .suit-clubs {
+            background-color: var(--black);
+            color: white;
+        }
+        
+        .suit-spades {
+            background-color: #34495e;
+            color: white;
+        }
+        
+        .multiplier-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .chip-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .card {
+                width: 70px;
+                height: 100px;
+            }
+            
+            .card-value {
+                font-size: 1.4rem;
+            }
+            
+            .card-suit {
+                font-size: 1.2rem;
+            }
+            
+            .game-controls {
+                flex-wrap: wrap;
+            }
+            
+            .balance-display {
+                position: static;
+                transform: none;
+                margin-top: 0.5rem;
+                justify-content: center;
+            }
+            
+            .phase-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ride the Bus</h1>
+        <div class="balance-display">
+            <i class="fas fa-coins"></i>
+            <span id="balance">1000</span>
+        </div>
+    </header>
+    
+    <div class="game-container">
+        <div class="betting-panel">
+            <h2>Place Your Bet</h2>
+            <div class="bet-controls">
+                <div class="chip-buttons">
+                    <button class="chip chip-5" data-value="5">$5</button>
+                    <button class="chip chip-10" data-value="10">$10</button>
+                    <button class="chip chip-25" data-value="25">$25</button>
+                    <button class="chip chip-50" data-value="50">$50</button>
+                    <button class="chip chip-100" data-value="100">$100</button>
+                </div>
+                <div class="bet-display">
+                    Current Bet: $<span id="current-bet">0</span>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button id="clear-bet" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Clear
+                </button>
+                <button id="deal-btn" class="btn btn-primary" disabled>
+                    <i class="fas fa-play"></i> Start Game
+                </button>
+                <button id="rules-btn" class="btn btn-secondary">
+                    <i class="fas fa-book"></i> Rules
+                </button>
+            </div>
+        </div>
+        
+        <div class="game-board">
+            <div class="message-panel" id="message">
+                Place your bet to start the game!
+            </div>
+            
+            <div class="phase-container" id="phase1-container" style="display: none;">
+                <div class="phase-title">
+                    <h2>Phase 1: Red or Black</h2>
+                    <div class="multiplier-display">Multiplier: 1x</div>
+                </div>
+                <p class="phase-instructions">Guess whether the next card will be red or black</p>
+                <div class="card-display" id="phase1-cards"></div>
+                <div class="phase-options">
+                    <div class="phase-option option-red" id="guess-red">
+                        <i class="fas fa-heart"></i> Red
+                    </div>
+                    <div class="phase-option option-black" id="guess-black">
+                        <i class="fas fa-spade"></i> Black
+                    </div>
+                </div>
+            </div>
+            
+            <div class="phase-container" id="phase2-container" style="display: none;">
+                <div class="phase-title">
+                    <h2>Phase 2: Higher or Lower</h2>
+                    <div class="multiplier-display">Multiplier: 2x</div>
+                </div>
+                <p class="phase-instructions">Guess whether the next card will be higher or lower than the previous card</p>
+                <div class="card-display" id="phase2-cards"></div>
+                <div class="phase-options">
+                    <div class="phase-option option-higher" id="guess-higher">
+                        <i class="fas fa-arrow-up"></i> Higher
+                    </div>
+                    <div class="phase-option option-lower" id="guess-lower">
+                        <i class="fas fa-arrow-down"></i> Lower
+                    </div>
+                </div>
+            </div>
+            
+            <div class="phase-container" id="phase3-container" style="display: none;">
+                <div class="phase-title">
+                    <h2>Phase 3: Outside or Inside</h2>
+                    <div class="multiplier-display">Multiplier: 3x</div>
+                </div>
+                <p class="phase-instructions">Guess whether the next card will be outside or inside the values of the two previous cards</p>
+                <div class="card-display" id="phase3-cards"></div>
+                <div class="phase-options">
+                    <div class="phase-option option-outside" id="guess-outside">
+                        <i class="fas fa-arrows-alt-h"></i> Outside
+                    </div>
+                    <div class="phase-option option-inside" id="guess-inside">
+                        <i class="fas fa-arrows-alt-v"></i> Inside
+                    </div>
+                </div>
+            </div>
+            
+            <div class="phase-container" id="phase4-container" style="display: none;">
+                <div class="phase-title">
+                    <h2>Phase 4: Guess the Suit</h2>
+                    <div class="multiplier-display">Multiplier: 4x</div>
+                </div>
+                <p class="phase-instructions">Guess the suit of the next card</p>
+                <div class="card-display" id="phase4-cards"></div>
+                <div class="suit-options">
+                    <div class="suit-option suit-hearts" id="guess-hearts">
+                        <i class="fas fa-heart"></i> Hearts
+                    </div>
+                    <div class="suit-option suit-diamonds" id="guess-diamonds">
+                        <i class="fas fa-gem"></i> Diamonds
+                    </div>
+                    <div class="suit-option suit-clubs" id="guess-clubs">
+                        <i class="fas fa-club"></i> Clubs
+                    </div>
+                    <div class="suit-option suit-spades" id="guess-spades">
+                        <i class="fas fa-spade"></i> Spades
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-controls" id="action-buttons" style="display: none;">
+                <button id="next-phase-btn" class="btn btn-primary" disabled>
+                    <i class="fas fa-arrow-right"></i> Next Phase
+                </button>
+                <button id="cash-out-btn" class="btn btn-success">
+                    <i class="fas fa-money-bill-wave"></i> Cash Out
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="rules-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2>Ride the Bus Rules</h2>
+            <ul class="rules-list">
+                <li>This is a 4-phase guessing game where you progress by making correct guesses.</li>
+                <li>Each phase has increasing multipliers (1x, 2x, 3x, 4x).</li>
+                <li><strong>Phase 1:</strong> Guess if the card will be Red or Black.</li>
+                <li><strong>Phase 2:</strong> Guess if the next card will be Higher or Lower than the previous card (Ace is high).</li>
+                <li><strong>Phase 3:</strong> Guess if the next card will be Outside or Inside the range of the two previous cards.</li>
+                <li><strong>Phase 4:</strong> Guess the exact suit of the next card.</li>
+                <li>You can cash out after any successful phase to collect your winnings.</li>
+                <li>If you guess wrong at any phase, you lose your bet.</li>
+            </ul>
+            <button id="close-rules" class="btn btn-primary">Got It!</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <h2 id="result-title">Result</h2>
+            <p id="result-message"></p>
+            <p id="result-payout"></p>
+            <button id="new-game-btn" class="btn btn-primary">
+                <i class="fas fa-redo"></i> New Game
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game configuration
+        const config = {
+            initialBalance: 1000,
+            multipliers: [1, 2, 3, 4],
+            cardBackDelay: 1000 // Delay for showing card backs (ms)
+        };
+
+        // Game state
+        const state = {
+            balance: config.initialBalance,
+            currentBet: 0,
+            deck: [],
+            currentPhase: 0,
+            gameActive: false,
+            cards: [],
+            currentMultiplier: 1,
+            awaitingResult: false
+        };
+
+        // DOM elements
+        const elements = {
+            balance: document.getElementById('balance'),
+            currentBet: document.getElementById('current-bet'),
+            message: document.getElementById('message'),
+            dealBtn: document.getElementById('deal-btn'),
+            clearBet: document.getElementById('clear-bet'),
+            chipButtons: document.querySelectorAll('.chip'),
+            rulesBtn: document.getElementById('rules-btn'),
+            rulesModal: document.getElementById('rules-modal'),
+            closeRules: document.getElementById('close-rules'),
+            closeModal: document.querySelector('.close-modal'),
+            resultModal: document.getElementById('result-modal'),
+            resultTitle: document.getElementById('result-title'),
+            resultMessage: document.getElementById('result-message'),
+            resultPayout: document.getElementById('result-payout'),
+            newGameBtn: document.getElementById('new-game-btn'),
+            phaseContainers: [
+                document.getElementById('phase1-container'),
+                document.getElementById('phase2-container'),
+                document.getElementById('phase3-container'),
+                document.getElementById('phase4-container')
+            ],
+            cardDisplays: [
+                document.getElementById('phase1-cards'),
+                document.getElementById('phase2-cards'),
+                document.getElementById('phase3-cards'),
+                document.getElementById('phase4-cards')
+            ],
+            actionButtons: document.getElementById('action-buttons'),
+            nextPhaseBtn: document.getElementById('next-phase-btn'),
+            cashOutBtn: document.getElementById('cash-out-btn'),
+            guessOptions: {
+                red: document.getElementById('guess-red'),
+                black: document.getElementById('guess-black'),
+                higher: document.getElementById('guess-higher'),
+                lower: document.getElementById('guess-lower'),
+                outside: document.getElementById('guess-outside'),
+                inside: document.getElementById('guess-inside'),
+                hearts: document.getElementById('guess-hearts'),
+                diamonds: document.getElementById('guess-diamonds'),
+                clubs: document.getElementById('guess-clubs'),
+                spades: document.getElementById('guess-spades')
+            }
+        };
+
+        // Card suits and values
+        const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const valueOrder = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+
+        // Initialize the game
+        function init() {
+            createDeck();
+            updateUI();
+            setupEventListeners();
+            showMessage("Place your bet to start the game!");
+        }
+
+        // Create and shuffle a new deck
+        function createDeck() {
+            state.deck = [];
+            for (let suit of suits) {
+                for (let value of values) {
+                    state.deck.push({ suit, value });
+                }
+            }
+            shuffleDeck();
+        }
+
+        // Shuffle the deck using Fisher-Yates algorithm
+        function shuffleDeck() {
+            for (let i = state.deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [state.deck[i], state.deck[j]] = [state.deck[j], state.deck[i]];
+            }
+        }
+
+        // Deal a card from the deck
+        function dealCard() {
+            if (state.deck.length === 0) {
+                createDeck();
+            }
+            return state.deck.pop();
+        }
+
+        // Start a new game
+        function startGame() {
+            if (state.currentBet <= 0) {
+                showMessage("Please place a bet first!", true);
+                return;
+            }
+            if (state.currentBet > state.balance) {
+                showMessage("You don't have enough balance for this bet!", true);
+                return;
+            }
+
+            // Reset game state
+            state.gameActive = true;
+            state.currentPhase = 0;
+            state.cards = [];
+            state.balance -= state.currentBet;
+            state.currentMultiplier = config.multipliers[state.currentPhase];
+            state.awaitingResult = false;
+
+            // Show first phase
+            showPhase(0);
+            updateUI();
+            showMessage("Phase 1: Guess if the next card is Red or Black");
+        }
+
+        // Show a specific phase
+        function showPhase(phaseIndex) {
+            // Hide all phases first
+            elements.phaseContainers.forEach(container => {
+                container.style.display = 'none';
+            });
+
+            // Show the requested phase
+            elements.phaseContainers[phaseIndex].style.display = 'block';
+            elements.actionButtons.style.display = 'flex';
+            elements.nextPhaseBtn.disabled = true;
+
+            // Update the card display for this phase
+            updateCardDisplay(phaseIndex);
+        }
+
+        // Update the card display for a phase
+        function updateCardDisplay(phaseIndex) {
+            elements.cardDisplays[phaseIndex].innerHTML = '';
+            
+            // Show all cards up to the current phase
+            for (let i = 0; i < state.cards.length; i++) {
+                elements.cardDisplays[phaseIndex].appendChild(createCardElement(state.cards[i]));
+            }
+        }
+
+        // Handle a guess in the current phase
+        function handleGuess(guess) {
+            if (!state.gameActive || state.awaitingResult) return;
+
+            state.awaitingResult = true;
+            disableAllOptions();
+
+            // Show card back temporarily
+            const cardDisplay = elements.cardDisplays[state.currentPhase];
+            const cardBack = document.createElement('div');
+            cardBack.className = 'card card-back';
+            cardDisplay.appendChild(cardBack);
+
+            // Deal card after a short delay
+            setTimeout(() => {
+                const currentCard = dealCard();
+                state.cards.push(currentCard);
+                cardDisplay.removeChild(cardBack);
+                cardDisplay.appendChild(createCardElement(currentCard));
+
+                let correct = false;
+                let message = '';
+
+                switch (state.currentPhase) {
+                    case 0: // Red or Black
+                        const isRed = currentCard.suit === 'hearts' || currentCard.suit === 'diamonds';
+                        correct = (guess === 'red' && isRed) || (guess === 'black' && !isRed);
+                        message = correct ? 
+                            `Correct! It's ${isRed ? 'red' : 'black'}` : 
+                            `Wrong! It's ${isRed ? 'red' : 'black'}`;
+                        break;
+                        
+                    case 1: // Higher or Lower
+                        const prevValue = valueOrder[state.cards[state.cards.length - 2].value];
+                        const currentValue = valueOrder[currentCard.value];
+                        
+                        if (prevValue === currentValue) {
+                            correct = false;
+                            message = `It's the same value (${currentCard.value})! You lose.`;
+                        } else {
+                            const isHigher = currentValue > prevValue;
+                            correct = (guess === 'higher' && isHigher) || (guess === 'lower' && !isHigher);
+                            message = correct ? 
+                                `Correct! ${currentCard.value} is ${isHigher ? 'higher' : 'lower'} than ${state.cards[state.cards.length - 2].value}` : 
+                                `Wrong! ${currentCard.value} is ${isHigher ? 'higher' : 'lower'} than ${state.cards[state.cards.length - 2].value}`;
+                        }
+                        break;
+                        
+                    case 2: // Outside or Inside
+                        const card1 = valueOrder[state.cards[state.cards.length - 2].value];
+                        const card2 = valueOrder[state.cards[state.cards.length - 3].value];
+                        const currentVal = valueOrder[currentCard.value];
+                        
+                        const low = Math.min(card1, card2);
+                        const high = Math.max(card1, card2);
+                        
+                        const isOutside = currentVal < low || currentVal > high;
+                        const isInside = currentVal > low && currentVal < high;
+                        
+                        if (currentVal === low || currentVal === high) {
+                            correct = false;
+                            message = `It's exactly on the edge (${currentCard.value})! You lose.`;
+                        } else {
+                            correct = (guess === 'outside' && isOutside) || (guess === 'inside' && isInside);
+                            message = correct ? 
+                                `Correct! ${currentCard.value} is ${isOutside ? 'outside' : 'inside'} ${low} and ${high}` : 
+                                `Wrong! ${currentCard.value} is ${isOutside ? 'outside' : 'inside'} ${low} and ${high}`;
+                        }
+                        break;
+                        
+                    case 3: // Guess the suit
+                        correct = guess === currentCard.suit;
+                        message = correct ? 
+                            `Correct! It's ${currentCard.suit}` : 
+                            `Wrong! It's ${currentCard.suit}`;
+                        break;
+                }
+
+                showMessage(message, !correct);
+                
+                if (correct) {
+                    state.currentMultiplier = config.multipliers[state.currentPhase];
+                    
+                    if (state.currentPhase === 3) {
+                        // Completed all phases!
+                        const winnings = Math.floor(state.currentBet * state.currentMultiplier);
+                        state.balance += state.currentBet + winnings;
+                        
+                        showResult(
+                            "You Rode the Bus!",
+                            "You successfully completed all 4 phases!",
+                            `You won $${winnings}!`
+                        );
+                        resetGame();
+                    } else {
+                        // Enable next phase button
+                        elements.nextPhaseBtn.disabled = false;
+                    }
+                } else {
+                    // Game over
+                    showResult(
+                        "Game Over",
+                        "Your guess was incorrect.",
+                        `You lost $${state.currentBet}.`
+                    );
+                    resetGame();
+                }
+                
+                state.awaitingResult = false;
+                updateUI();
+            }, config.cardBackDelay);
+        }
+
+        // Move to the next phase
+        function nextPhase() {
+            state.currentPhase++;
+            state.currentMultiplier = config.multipliers[state.currentPhase];
+            showPhase(state.currentPhase);
+            showMessage(`Phase ${state.currentPhase + 1}: ${getPhaseInstructions(state.currentPhase)}`);
+            updateUI();
+        }
+
+        // Get instructions for the current phase
+        function getPhaseInstructions(phase) {
+            switch (phase) {
+                case 0: return "Guess if the next card is Red or Black";
+                case 1: return "Guess if the next card is Higher or Lower than the previous card";
+                case 2: return "Guess if the next card is Outside or Inside the range of the two previous cards";
+                case 3: return "Guess the suit of the next card";
+                default: return "";
+            }
+        }
+
+        // Cash out with current winnings
+        function cashOut() {
+            const winnings = Math.floor(state.currentBet * state.currentMultiplier);
+            state.balance += state.currentBet + winnings;
+            
+            showResult(
+                "Cashed Out!",
+                `You successfully completed ${state.currentPhase + 1} phase(s).`,
+                `You won $${winnings}!`
+            );
+            resetGame();
+        }
+
+        // Disable all guess options
+        function disableAllOptions() {
+            Object.values(elements.guessOptions).forEach(option => {
+                option.style.opacity = '0.5';
+                option.style.pointerEvents = 'none';
+            });
+        }
+
+        // Enable all guess options
+        function enableAllOptions() {
+            Object.values(elements.guessOptions).forEach(option => {
+                option.style.opacity = '1';
+                option.style.pointerEvents = 'all';
+            });
+        }
+
+        // Create a card element
+        function createCardElement(card) {
+            const cardEl = document.createElement('div');
+            cardEl.className = `card ${card.suit === 'hearts' || card.suit === 'diamonds' ? 'red' : 'black'}`;
+            
+            const valueEl = document.createElement('div');
+            valueEl.className = 'card-value';
+            valueEl.textContent = card.value;
+            
+            const suitEl = document.createElement('div');
+            suitEl.className = 'card-suit';
+            suitEl.innerHTML = getSuitSymbol(card.suit);
+            
+            cardEl.appendChild(valueEl);
+            cardEl.appendChild(suitEl);
+            
+            return cardEl;
+        }
+
+        // Get suit symbol
+        function getSuitSymbol(suit) {
+            switch (suit) {
+                case 'hearts': return '&hearts;';
+                case 'diamonds': return '&diams;';
+                case 'clubs': return '&clubs;';
+                case 'spades': return '&spades;';
+                default: return '';
+            }
+        }
+
+        // Place a bet
+        function placeBet(amount) {
+            if (state.gameActive) return;
+            
+            amount = parseInt(amount);
+            const newBet = state.currentBet + amount;
+            
+            if (newBet > state.balance) {
+                showMessage("You don't have enough balance!", true);
+                return;
+            }
+            
+            state.currentBet = newBet;
+            updateUI();
+            showMessage(`Bet placed: $${state.currentBet}. Click "Start Game" to begin.`);
+        }
+
+        // Clear the current bet
+        function clearBet() {
+            if (state.gameActive) return;
+            state.currentBet = 0;
+            updateUI();
+            showMessage("Bet cleared. Place your bet to start the game!");
+        }
+
+        // Reset the game
+        function resetGame() {
+            state.gameActive = false;
+            state.currentPhase = 0;
+            state.cards = [];
+            state.currentBet = 0;
+            
+            // Hide all phases and action buttons
+            elements.phaseContainers.forEach(container => {
+                container.style.display = 'none';
+            });
+            elements.actionButtons.style.display = 'none';
+            
+            updateUI();
+            showMessage("Place your bet to start a new game!");
+        }
+
+        // Display a message in the message panel
+        function showMessage(msg, isError = false) {
+            elements.message.textContent = msg;
+            elements.message.className = 'message-panel ' + (isError ? 'lose-message' : 'win-message');
+        }
+
+        // Show result modal
+        function showResult(title, message, payout) {
+            elements.resultTitle.textContent = title;
+            elements.resultMessage.textContent = message;
+            elements.resultPayout.textContent = payout;
+            elements.resultModal.classList.add('show');
+        }
+
+        // Update the UI
+        function updateUI() {
+            // Update balance and bet
+            elements.balance.textContent = state.balance;
+            elements.currentBet.textContent = state.currentBet;
+            
+            // Enable/disable deal button
+            elements.dealBtn.disabled = state.currentBet <= 0 || state.gameActive;
+            
+            // Update multiplier displays
+            for (let i = 0; i < elements.phaseContainers.length; i++) {
+                const multiplierEl = elements.phaseContainers[i].querySelector('.multiplier-display');
+                if (multiplierEl) {
+                    multiplierEl.textContent = `Multiplier: ${config.multipliers[i]}x`;
+                }
+            }
+            
+            // Enable/disable options based on game state
+            if (state.gameActive && !state.awaitingResult) {
+                enableAllOptions();
+            } else {
+                disableAllOptions();
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Chip buttons
+            elements.chipButtons.forEach(button => {
+                button.addEventListener('click', () => placeBet(button.dataset.value));
+            });
+            
+            // Clear bet button
+            elements.clearBet.addEventListener('click', clearBet);
+            
+            // Deal button
+            elements.dealBtn.addEventListener('click', startGame);
+            
+            // Game action buttons
+            elements.nextPhaseBtn.addEventListener('click', nextPhase);
+            elements.cashOutBtn.addEventListener('click', cashOut);
+            
+            // Guess options
+            elements.guessOptions.red.addEventListener('click', () => handleGuess('red'));
+            elements.guessOptions.black.addEventListener('click', () => handleGuess('black'));
+            elements.guessOptions.higher.addEventListener('click', () => handleGuess('higher'));
+            elements.guessOptions.lower.addEventListener('click', () => handleGuess('lower'));
+            elements.guessOptions.outside.addEventListener('click', () => handleGuess('outside'));
+            elements.guessOptions.inside.addEventListener('click', () => handleGuess('inside'));
+            elements.guessOptions.hearts.addEventListener('click', () => handleGuess('hearts'));
+            elements.guessOptions.diamonds.addEventListener('click', () => handleGuess('diamonds'));
+            elements.guessOptions.clubs.addEventListener('click', () => handleGuess('clubs'));
+            elements.guessOptions.spades.addEventListener('click', () => handleGuess('spades'));
+            
+            // Rules modal
+            elements.rulesBtn.addEventListener('click', () => {
+                elements.rulesModal.classList.add('show');
+            });
+            
+            elements.closeRules.addEventListener('click', () => {
+                elements.rulesModal.classList.remove('show');
+            });
+            
+            elements.closeModal.addEventListener('click', () => {
+                elements.rulesModal.classList.remove('show');
+            });
+            
+            // Result modal
+            elements.newGameBtn.addEventListener('click', () => {
+                elements.resultModal.classList.remove('show');
+                resetGame();
+            });
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === elements.rulesModal) {
+                    elements.rulesModal.classList.remove('show');
+                }
+                if (e.target === elements.resultModal) {
+                    elements.resultModal.classList.remove('show');
+                    resetGame();
+                }
+            });
+        }
+
+        // Initialize the game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
