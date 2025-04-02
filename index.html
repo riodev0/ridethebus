@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ride the Bus | RioDev</title>
+    <title>Ride the Bus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -520,8 +520,20 @@
                 <button id="rules-btn" class="btn btn-secondary">
                     <i class="fas fa-book"></i> Rules
                 </button>
+                <button id="home-btn" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Home
+                </button>
             </div>
         </div>
+<script>
+    // Add with your other JavaScript
+    document.getElementById('home-btn').addEventListener('click', () => {
+        window.location.href = "https://riodev0.github.io/home";
+    });
+</script>
+
+
+
         
         <div class="game-board">
             <div class="message-panel" id="message">
